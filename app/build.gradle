@@ -5,7 +5,7 @@ plugins {
 def localProperties = new Properties()
 localProperties.load(new FileInputStream(rootProject.file("local.properties")))
 android {
-    namespace 'com.bogarsoft.personalnote'
+    namespace 'com.bogarsoft.noteify'
     compileSdk 33
     defaultConfig {
         applicationId "com.bogarsoft.personalnote"
@@ -91,6 +91,9 @@ dependencies {
     //nosql database
     implementation ('org.dizitart:nitrite:3.4.4')
     implementation('org.dizitart:potassium-nitrite:3.4.4')
+
+    //link parser
+    implementation 'com.github.Priyansh-Kedia:OpenGraphParser:2.5.5'
 
 
 
