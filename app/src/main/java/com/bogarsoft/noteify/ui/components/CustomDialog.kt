@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.Money
 import androidx.compose.material3.Button
+import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -78,7 +79,9 @@ fun CustomDialog(title:String, value: String, setShowDialog: (Boolean) -> Unit,o
                 Column(modifier = Modifier.padding(20.dp)) {
 
                     Row(
-                        modifier = Modifier.fillMaxWidth().height(50.dp),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
@@ -94,10 +97,15 @@ fun CustomDialog(title:String, value: String, setShowDialog: (Boolean) -> Unit,o
                             },
                             isHintVisible = hideTitleHint,
                             singleLine = false,
-                            textStyle = MaterialTheme.typography.bodyLarge,
+                            textStyle = TextStyle(
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+
                         )
 
                     }
+                    Divider()
 
                     Spacer(modifier = Modifier.height(20.dp))
 
@@ -119,7 +127,9 @@ fun CustomDialog(title:String, value: String, setShowDialog: (Boolean) -> Unit,o
 
                     Spacer(modifier = Modifier.height(20.dp))
 
-                    Box(modifier = Modifier.padding(0.dp, 0.dp, 0.dp, 0.dp).fillMaxWidth()) {
+                    Box(modifier = Modifier
+                        .padding(0.dp, 0.dp, 0.dp, 0.dp)
+                        .fillMaxWidth()) {
                         Button(
                             onClick = {
                                 if (txtField.value.isEmpty()) {

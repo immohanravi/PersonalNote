@@ -33,6 +33,7 @@ class NoteRepository(private val repo:ObjectRepository<Note>) {
             list.add(note)
         }
 
+        list.sortByDescending { it.date }
         _data.value = list
     }
 

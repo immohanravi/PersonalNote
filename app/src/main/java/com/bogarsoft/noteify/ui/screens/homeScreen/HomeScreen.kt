@@ -74,6 +74,9 @@ fun HomeScreen(
                     items(state.size){
                         NoteComponent(note = state[it], onDelete = {
                             viewModel.delete(it)
+                        }, onClick = {
+                            navController.navigate(Screen.AddEditNoteScreen.route + "/${it.id}")
+
                         })
                     }
                 }

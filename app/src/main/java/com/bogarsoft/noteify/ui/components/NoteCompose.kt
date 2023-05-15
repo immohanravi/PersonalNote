@@ -30,6 +30,7 @@ import com.bogarsoft.noteify.utils.Helper
 fun NoteComponent(
     note: Note,
     onDelete: (Note) -> Unit,
+    onClick: (Note) -> Unit
 ) {
 
     Card(

@@ -40,6 +40,7 @@ import java.util.UUID
 @Composable
 fun AddNoteScreen(
     navController: NavController,
+    note: Note? = null,
     onClick: (Note) ->Unit,
 ) {
 
@@ -53,6 +54,11 @@ fun AddNoteScreen(
     }
     var hideContentHint by remember {
         mutableStateOf(true)
+    }
+
+    if (note != null) {
+        title = note.title
+        content = note.content
     }
 
     Scaffold(

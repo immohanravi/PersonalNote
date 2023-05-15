@@ -3,10 +3,16 @@ package com.bogarsoft.noteify
 
 import android.content.Intent
 import android.os.Bundle
+import android.text.Layout.Alignment
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -20,8 +26,10 @@ import com.bogarsoft.noteify.ui.components.CustomDialog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.style.TextAlign
 import com.bogarsoft.noteify.data.NoteRepository
 import com.bogarsoft.noteify.database.DBHandler
+import com.bogarsoft.noteify.interfaces.OnOpenGraphResponse
 import com.bogarsoft.noteify.models.Note
 import com.bogarsoft.noteify.ui.screens.HomeViewModel
 import com.bogarsoft.noteify.utils.Helper
@@ -32,46 +40,69 @@ import com.kedia.ogparser.OpenGraphParser
 import com.kedia.ogparser.OpenGraphResult
 import kotlin.system.exitProcess
 
-class DialogActivity : ComponentActivity(), OpenGraphCallback {
+class DialogActivity : ComponentActivity(){
 
-    private val openGraphParser by lazy {
-        OpenGraphParser(
-            listener = this,
-            showNullOnEmpty = true,
-            cacheProvider = OpenGraphCacheProvider(this)
-        )
-    }
-    var title by mutableStateOf("")
-    var show by mutableStateOf(true)
-    var value by  mutableStateOf("")
+
+
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val activity = findActivity()
-        activity?.intent?.let { intent ->
-            if (intent.action == Intent.ACTION_SEND) {
-                intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
-                    value = text
-                    val link = Helper.extractLink(text)
-                    link?.let {
-                        title = text.substring(0, text.indexOf(link))
-                        openGraphParser.parse(it)
-                    }?:run{
-                        if (text.length > 30) {
-                            title = text.substring(0, 30)+"..."
-                        } else {
-                            title = text
-                        }
-                    }
-                }
 
-            }
-        }
         val db = DBHandler.getDBInstance(applicationContext)
         val repo = db.getRepository(Note::class.java)
         val respository = NoteRepository(repo)
         val viewModel = HomeViewModel(respository)
         setContent {
+            var title by remember {
+                mutableStateOf("")
+            }
+            var show by remember {
+                mutableStateOf(false)
+            }
+            var value by remember {
+                mutableStateOf("")
+            }
+            activity?.intent?.let { intent ->
+                if (intent.action == Intent.ACTION_SEND) {
+                    intent.getStringExtra(Intent.EXTRA_TEXT)?.let { text ->
+                        value = text
+                        val link = Helper.extractLink(text)
+                        link?.let {
+                            title = text.substring(0, text.indexOf(link))
+                            Helper.getOpenGraph(link, LocalContext.current,object : OnOpenGraphResponse{
+                                override fun response(openGraphResult: OpenGraphResult) {
+                                    openGraphResult.title?.let {
+                                        Log.d(TAG, "onPostResponse: ${it}")
+                                        title = if (it.length > 30) {
+                                            it.substring(0, 30)+"..."
+                                        } else {
+                                            it
+                                        }
+                                        show = true
+
+                                    }
+                                }
+
+                                override fun error(error: String) {
+                                    show = true
+                                }
+
+                            })
+                        }?:run{
+                            if (text.length > 30) {
+                                title = text.substring(0, 30)+"..."
+                                show = true
+                            } else {
+                                title = text
+                                show = true
+                            }
+                        }
+                    }
+
+                }
+            }
+
 
             Surface(
                 modifier = Modifier.fillMaxSize(),
@@ -120,6 +151,12 @@ class DialogActivity : ComponentActivity(), OpenGraphCallback {
                         viewModel.addNote(it)
                         finish()
                     })
+                }else {
+                    Column(modifier = Modifier.fillMaxSize(), horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally, verticalArrangement = Arrangement.Center) {
+                        //Text(text = "Dialog Activity", modifier = Modifier.fillMaxSize())
+                        Text(text ="processing...",color = Color.White,modifier = Modifier.fillMaxWidth(), textAlign = TextAlign.Center)
+                    }
+
                 }
 
 
@@ -132,22 +169,5 @@ class DialogActivity : ComponentActivity(), OpenGraphCallback {
         private const val TAG = "DialogActivity"
     }
 
-    override fun onError(error: String) {
 
-    }
-
-    override fun onPostResponse(openGraphResult: OpenGraphResult) {
-        openGraphResult.let { graphResult ->
-            graphResult.title?.let {
-                Log.d(TAG, "onPostResponse: ${it.length}")
-                title = if (it.length > 30) {
-                    it.substring(0, 30)+"..."
-                } else {
-                    it
-                }
-
-            }
-        }
-
-    }
 }
